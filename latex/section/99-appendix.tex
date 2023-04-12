@@ -1,0 +1,181 @@
+\section{Proofs}
+\label{app:proofs}
+
+Here are the proofs for the theoretical results in the main text.
+
+\decomposition*
+\begin{proof}[\mbox{\hyperref[thm:decomposition]{Proof}}]\label{proof:decomposition}
+By the chain rule, $\nabla_\vw\el(\vw)^\top \Delta \vw = \frac{1}{|\set{S}|}\sum_{(\vx,\vy)\in \set{S}} \nabla_{\vf(\vx)} \ell(\vf(\vx),\vy)^\top \nabla_\vw \vf(\vx) \Delta \vw$. Therefore:
+\begin{equation*}
+    \Delta \el(\vw) - \nabla_\vw\el(\vw)^\top \Delta \vw = \frac{1}{|\set{S}|}\sum_{(\vx,\vy)\in \set{S}}\Delta \ell(\vf(\vx), \vy) - \nabla_{\vf(\vx)} \ell(\vf(\vx),\vy)^\top \nabla_\vw \vf(\vx) \Delta \vw.
+\end{equation*}
+Adding and subtracting $\frac{1}{|\set{S}|}\sum_{(\vx,\vy)\in \set{S}}\nabla_{\vf(\vx)}\ell(\vf(\vx),\vy)^\top \Delta \vf(\vx)$ on the right-hand side yields the result.
+\end{proof}
+
+\squarebreg*
+\begin{proof}[\mbox{\hyperref[lem:sq-bregman]{Proof}}]\label{proof:squarebreg}
+Expanding the Euclidean norms in the loss perturbation $\Delta \ell$ yields:
+\begin{align*}
+    \Delta \ell(\vf(\vx), \vy) & = \tfrac{1}{2d_L} \norm{\vf(\vx) + \Delta \vf(\vx) - \vy}_2^2 - \tfrac{1}{2d_L} \norm{\vf(\vx) - \vy}_2^2 \\
+    &= \tfrac{1}{2d_L} \norm{\Delta \vf(\vx)}_2^2 + (\vf(\vx) - \vy)^\top \Delta \vf(\vx).
+\end{align*}
+The result follows by identifying that $\nabla_{\vf(\vx)}\ell(\vf(\vx),\vy)^\top \Delta \vf(\vx) = (\vf(\vx) - \vy)^\top \Delta \vf(\vx)$.
+\end{proof}
+
+\xentbreg*
+\begin{proof}[\mbox{\hyperref[lem:xent-bregman]{Proof}}]\label{proof:xentbreg}
+First, since $\sum_i \vy_i =1$, cross-entropy loss may be re-written:
+\begin{align*}
+    \ell(\vf(\vx), \vy) \defeq - \log [\softmax(\vf(\vx))]^\top \vy = - \vf(\vx)^\top \vy +  \log \norm{\exp \vf(\vx)}_1.
+\end{align*}
+The linear term $- \vf(\vx)^\top \vy$ does not contribute to the linearisation error and may be neglected. Therefore:
+\begin{align*}
+    &\Delta \ell(\vf(\vx), \vy) -\nabla_{\vf(\vx)}\ell(\vf(\vx),\vy)^\top \Delta \vf(\vx) \\
+    &\quad\quad= \log \norm{\exp (\vf(\vx)+\Delta \vf(\vx))}_1 - \log \norm{\exp \vf(\vx)}_1 - \nabla_{\vf(\vx)}\log \norm{\exp \vf(\vx)}_1^\top \Delta \vf(\vx) \\
+    &\quad\quad= \log \frac{1/\norm{\exp \vf(\vx)}_1}{1/\norm{\exp (\vf(\vx)+\Delta \vf(\vx))}_1} - \frac{\exp\vf(\vx)^\top}{\norm{\exp \vf(\vx)}_1} \Delta \vf(\vx)\\
+    &\quad\quad=\frac{\exp\vf(\vx)^\top}{\norm{\exp \vf(\vx)}_1} \log \frac{\exp \vf(\vx)/\norm{\exp \vf(\vx)}_1}{\exp (\vf(\vx)+\Delta \vf(\vx))/\norm{\exp (\vf(\vx)+\Delta \vf(\vx))}_1}.
+\end{align*}
+The final line is equivalent to $\kl \Big(\softmax(\vf(\vx))\,\Big|\Big|\, \softmax(\vf(\vx)+\Delta \vf(\vx))\Big)$ establishing the first equality.
+
+To establish the inequality, let $\otimes$ denote the outer product and define $p \defeq\softmax(f(\vx))$. Then we have:
+\begin{align*}
+    \Delta \ell(\vf(\vx), \vy) -\nabla_{\vf(\vx)}\ell(\vf(\vx),\vy)^\top \Delta \vf(\vx) &= \frac{1}{2}\Delta \vf(\vx)^\top \nabla^2_{\vf(\vx)}\ell(\vf(\vx), \vy) \Delta \vf(\vx) + \mathcal{O}(\Delta \vf^3) \\
+    &= \frac{1}{2}\Delta \vf(\vx)^\top \nabla^2_{\vf(\vx)}\log \norm{\exp \vf(\vx)}_1 \Delta \vf(\vx) + \mathcal{O}(\Delta \vf^3)\\
+    &= \frac{1}{2}\Delta \vf(\vx)^\top [\diag (p) - p \otimes p] \Delta \vf(\vx) + \mathcal{O}(\Delta \vf^3)\\
+    &\leq \frac{1}{2}\Delta \vf(\vx)^\top \diag (p) \Delta \vf(\vx) + \mathcal{O}(\Delta \vf^3)\\
+    &\leq \frac{1}{2}\norm{\Delta \vf(\vx)}_\infty^2 + \mathcal{O}(\Delta \vf^3),
+\end{align*}
+where we have used that $p\otimes p$ is positive definite and then applied H\"older's inequality with $\norm{p}_1 = 1$.
+\end{proof}
+
+\functmajor*
+\begin{proof}[\mbox{\hyperref[thm:functmajor]{Proof}}]\label{proof:functmajor}
+The result follows by substituting \cref{ass:orthog} into \cref{thm:decomposition} and applying \cref{def:bregman}.
+\end{proof}
+
+\sqmajor*
+\begin{proof}[\mbox{\hyperref[lem:sq-major]{Proof}}]\label{proof:sqmajor} Combine \cref{lem:sq-bregman} with \cref{thm:functmajor} to obtain the result.
+\end{proof}
+
+\xentmajor*
+\begin{proof}[\mbox{\hyperref[lem:xent-major]{Proof}}]\label{proof:xentmajor} Combine \cref{lem:xent-bregman} with \cref{thm:functmajor} to obtain the result.
+\end{proof}
+
+\outbound*
+\begin{proof}[\mbox{\hyperref[lem:outbound]{Proof}}]\label{proof:outbound}
+For any vector $\vv$ and matrix $\mM$ with compatible dimensions, we have that $\norm{\mM \vv}_2 \leq \norm{\mM}_* \cdot \norm{\vv}_2$ and $\norm{\relu \vv}_2 \leq \norm{\vv}_2$. The lemma follows by applying these results recursively over the depth of the network.
+\end{proof}
+
+\archbounds*
+\begin{proof}[\mbox{\hyperref[lem:deep_perturbation_bounds]{Proof}}]\label{proof:archbounds} We proceed by induction. First, consider a network with $L=1$ layers: $\vf(\vx) = \mW_1 \vx$. Observe that $\norm{\Delta \vf(\vx)}_2 = \norm{\Delta \mW_1 \vx}_2 \leq \norm{\Delta \mW_1}_*\cdot \norm{\vx}_2$ as required. Next, assume that the result holds for a network $\vg(\vx)$ with $L-1$ layers and consider adding a layer to obtain $\vf(\vx) = \mW_L\circ \relu{}\circ \vg(\vx)$. Then:
+\begin{align*}
+    \norm{\Delta \vf(\vx)}_2 &= \norm{(\mW_L+\Delta \mW_L)\circ \relu{} \circ (\vg(\vx)+\Delta \vg(\vx)) - \mW_L \circ \relu{} \circ \vg(\vx)}_2 \\ 
+    &= \norm{\mW_L \left(\relu{} \circ (\vg(\vx)+\Delta
+    \vg(\vx)) - \relu{} \circ \vg(\vx)\right) + \Delta \mW_L \left( \relu{} \circ (\vg(\vx)+\Delta \vg(\vx)) - \relu(0)\right)}_2 \\
+    &\leq \norm{\mW_L}_*\cdot\norm{\Delta \vg(\vx)}_2 + \norm{\Delta \mW_L}_*\cdot(\norm{\vg(\vx)}_2 + \norm{\Delta \vg(\vx)}_2)\\
+    &= (\norm{\mW_L}_*+\norm{\Delta \mW_L}_*)\cdot \norm{\Delta \vg(\vx)}_2 + \norm{\Delta \mW_L}_*\cdot \norm{\vg(\vx)}_2,
+    \end{align*}
+    where the inequality follows by applying the triangle inequality, the operator norm bound, the fact that $\relu{}$ is one-Lipschitz, and a further application of the triangle inequality. But by the inductive hypothesis and \cref{lem:outbound}, the right-hand side is bounded by:
+    \begin{align*}
+    (\norm{\mW_L}_*&+\norm{\Delta \mW_L}_*) \left[ \prod_{k = 1}^{L-1} \left( 1 + \frac{\Vert \Delta \mW_k \Vert_{*}}{\Vert \mW_k \Vert_{*}}\right)  - 1 \right] \times \left[\prod_{k=1}^{L-1} \norm{\mW_k}_* \right] \times \norm{\vx}_2 + \norm{\Delta \mW_L}_* \times \left[\prod_{k=1}^{L-1} \norm{\mW_k}_* \right] \times \norm{\vx}_2\\
+    &= \left[ \prod_{k = 1}^L \left( 1 + \frac{\Vert \Delta \mW_k \Vert_{*}}{\Vert \mW_k \Vert_{*}}\right)  - 1 \right] \times \left[\prod_{k=1}^L \norm{\mW_k}_* \right] \times \norm{\vx}_2.
+\end{align*}
+The induction is complete. To further bound this result under \cref{prescription:norm}, observe that the product $\left[\prod_{k=1}^L \norm{\mW_k}_* \right] \times \norm{\vx}_2$ telescopes to just $\sqrt{d_L}$, while the other product satisfies:
+\begin{equation*}
+    \left[ \prod_{k = 1}^L \left( 1 + \frac{\Vert \Delta \mW_k \Vert_{*}}{\Vert \mW_k \Vert_{*}}\right)  - 1 \right] = \left(1+\frac{\eta}{L}\right)^L -1 \leq \lim_{L\to\infty}\left(1+\frac{\eta}{L}\right)^L-1 = \exp\eta - 1.
+\end{equation*}
+Combining these observations yields the result.
+\end{proof}
+
+\majordnn*
+\begin{proof}[\mbox{\hyperref[lem:sq-major-nn]{Proof}}]\label{proof:majordnn}
+Substitute \cref{lem:deep_perturbation_bounds} into \cref{lem:sq-major} and decompose $\nabla_\vw\el(\vw)^\top \Delta \vw = \sum_{k=1}^L \trace (\Delta \mW_k^\top \nabla_{\mW_k}\el)$. The result follows by realising that under \cref{prescription:norm}, the perturbations satisfy $\norm{\Delta \mW_k}_* = \sqrt{d_k/d_{k-1}} \cdot \frac{\eta}{L}$.
+\end{proof}
+
+\loglr*
+\begin{proof}[\mbox{\hyperref[thm:log-lr]{Proof}}]\label{proof:loglr} The inner product $\trace\frac{\Delta \mW_k^\top\nabla_{\mW_k}\el}{\norm{\Delta \mW_k}_*}$ that appears in \cref{lem:sq-major-nn} is most negative when the perturbation $\Delta \mW_k$ satisfies $\Delta \mW_k/\norm{\Delta \mW_k}_* = - \nabla_{\mW_k}\el / \norm{\nabla_{\mW_k}\el}_*$. Substituting this result back into \cref{lem:sq-major-nn} yields:
+\begin{equation*}
+        \el(\vw+\Delta \vw) \leq \el(\vw) - \frac{\eta}{L}\sum_{k=1}^L\left[\sqrt{d_k/d_{k-1}} \times\frac{\norm{\nabla_{\mW_k}\el}_F^2}{\norm{\nabla_{\mW_k}\el}_*}\right] + \tfrac{1}{2} \,(\exp \eta -1)^2.
+\end{equation*}
+Under \cref{approx:g-cond}, we have that $\norm{\nabla_{\mW_k}\el}_F^2/\norm{\nabla_{\mW_k}\el}_* = \norm{\nabla_{\mW_k}\el}_F$ and so this inequality simplifies to:
+\begin{equation*}
+        \el(\vw+\Delta \vw) \leq \el(\vw) - \eta\cdot G + \tfrac{1}{2} \,(\exp \eta -1)^2.
+\end{equation*}
+Taking the derivative of the right-hand side with respect to $\eta$ and setting it to zero yields $(\exp\eta-1)\exp\eta = G$. Applying the quadratic formula and retaining the positive solution yields $\exp \eta = \half(1+\sqrt{1+4G})$. Combining this with the relation that $\Delta \mW_k/\norm{\Delta \mW_k}_* = - \nabla_{\mW_k}\el / \norm{\nabla_{\mW_k}\el}_*$ and applying that $\norm{\Delta \mW_k}_* = \sqrt{d_k/d_{k-1}} \cdot \frac{\eta}{L}$ by \cref{prescription:norm} yields the result.
+\end{proof}
+
+\objectivebound*
+\begin{proof}[\mbox{\hyperref[lem:objectivebound]{Proof}}]\label{proof:objectivebound}
+The result follows by the following chain of inequalities:
+\begin{align*}
+    \el(\vw) \defeq \frac{1}{\abs{\set{S}}} \sum_{(\vx,\vy)\in \set{S}}\frac{1}{2d_L}\norm{\vf(\vx;\vw) - \vy}_2^2 \leq \frac{1}{\abs{\set{S}}} \sum_{(\vx,\vy)\in \set{S}}\frac{1}{2d_L}(\norm{\vf(\vx;\vw)}_2^2 +\norm{\vy}_2^2) \leq \frac{1}{\abs{\set{S}}} \sum_{(\vx,\vy)\in \set{S}}\frac{d_L+d_L}{2d_L} = 1,
+\end{align*}
+where the second inequality holds under \cref{prescription:norm}.
+\end{proof}
+
+\gradientbound*
+\begin{proof}[\mbox{\hyperref[lem:gradientbound]{Proof}}]\label{proof:gradientbound}
+By the chain rule, the gradient of mean square error objective may be written:
+\begin{align*}
+    \nabla_{\mW_k} \el(\vw) = \frac{1}{\abs{\set{S}}} \sum_{(\vx,\vy)\in \set{S}}\frac{1}{d_L}(\vf(\vx;\vw) - \vy)^\top \mW_L \cdot \mD_{L-1}\mW_{L-1} \dots \mD_{k+1}\mW_{k+1} \cdot \mD_{k} \otimes \mD_{k-1} \mW_{k-1}\dots \mD_1 \mW_1 \vx,
+\end{align*}
+where $\otimes$ denotes the outer product and $\mD_k$ denotes a diagonal matrix whose entries are one when $\relu$ is active and zero when $\relu$ is inactive. Since the operator norm $\norm{\mD_k}_* = 1$, we have that the Frobenius norm $\norm{\nabla_{\mW_k} \el(\vw)}_F$ is bounded from above by:
+\begin{align*}
+    &\frac{1}{\abs{\set{S}}} \sum_{(\vx,\vy)\in \set{S}}\frac{1}{d_L}\norm{(\vf(\vx;\vw) - \vy)^\top \mW_L \cdot \mD_{L-1}\mW_{L-1} \dots \mD_{k+1}\mW_{k+1} \cdot \mD_{k} \otimes \mD_{k-1} \mW_{k-1}\dots \mD_1 \mW_1 \vx}_F\\
+    &\hspace{3em}= \frac{1}{\abs{\set{S}}} \sum_{(\vx,\vy)\in \set{S}}\frac{1}{d_L}\norm{(\vf(\vx;\vw) - \vy)^\top \mW_L \cdot \mD_{L-1}\mW_{L-1} \dots \mD_{k+1}\mW_{k+1} \cdot \mD_{k}}_2 \cdot \norm{\mD_{k-1} \mW_{k-1}\dots \mD_1 \mW_1 \vx}_2\\
+    &\hspace{3em}\leq \frac{1}{\abs{\set{S}}} \sum_{(\vx,\vy)\in \set{S}}\frac{1}{d_L}\norm{\vf(\vx;\vw) - \vy}_2\cdot \norm{\mW_L}_*\cdot \norm{\mW_{L-1}}_* \dots \norm{\mW_{k+1}}_*\cdot \norm{\mW_{k-1}}_*\dots \norm{\mW_1}_*\cdot \norm{\vx}_2 \\
+    &\hspace{3em}= \frac{\prod_{l=1}^L\norm{\mW_l}_*}{\norm{\mW_k}} \times \frac{1}{\abs{\set{S}}} \sum_{(\vx,\vy)\in \set{S}}\frac{1}{d_L}\norm{\vf(\vx;\vw) - \vy}_2 \cdot \norm{\vx}_2 \\
+    &\hspace{3em}\leq \frac{\prod_{l=1}^L\norm{\mW_l}_*}{\norm{\mW_k}_*} \cdot\frac{1}{\sqrt{d_L}} \sqrt{\frac{2}{\abs{\set{S}}} \sum_{(\vx,\vy)\in \set{S}}\frac{1}{2d_L}\norm{\vf(\vx;\vw) - \vy}_2^2} \cdot \sqrt{\frac{1}{\abs{\set{S}}} \sum_{(\vx,\vy)\in \set{S}}\norm{\vx}_2^2}\\
+    &\hspace{3em}= \frac{\prod_{l=1}^L\norm{\mW_l}_*}{\norm{\mW_k}_*} \cdot \sqrt{\frac{2\el(\vw)}{d_L}} \cdot \sqrt{\frac{1}{\abs{\set{S}}} \sum_{(\vx,\vy)\in \set{S}}\norm{\vx}_2^2}.
+\end{align*}
+In the above argument, the first inequality follows by recursive application of the operator norm upper bound, and the second inequality follows from the Cauchy-Schwarz inequality. The right-hand side simplifies under \cref{prescription:norm}, and we may apply \cref{lem:objectivebound} to obtain:
+\begin{align*}
+    \norm{\nabla_{\mW_k} \el(\vw)}_F \leq \frac{\prod_{l=1}^L\norm{\mW_l}_*}{\norm{\mW_k}_*} \cdot \sqrt{\frac{2\el(\vw)}{d_L}} \cdot \sqrt{\frac{1}{\abs{\set{S}}} \sum_{(\vx,\vy)\in \set{S}}\norm{\vx}_2^2} \leq \frac{\sqrt{d_L/d_0}}{\sqrt{d_k / d_{k-1}}} \cdot \sqrt{\frac{2}{d_L}}\cdot \sqrt{d_0} = \sqrt{2}\cdot \sqrt{\frac{d_{k-1}}{d_k}}.
+\end{align*}
+\end{proof}
+
+\criticalrate*
+\begin{proof}[\mbox{\hyperref[lem:criticalrate]{Proof}}]\label{proof:criticalrate}
+\cref{thm:log-lr} prescribes that $\exp\eta = \half(1+\sqrt{1+4G})$, and so $\eta = \log\big(1+\frac{\sqrt{1+4G}-1}{2}\big)$. We begin by proving some useful auxiliary bounds.  By \cref{lem:gradientbound} and \cref{prescription:norm}, the gradient summary is bounded by:
+\begin{align*}
+    G \defeq \frac{1}{L}\sum_{k=1}^L \sqrt{d_k/d_{k-1}} \cdot \norm{ \nabla_{\mW_k} \el(\vw)}_F \leq \frac{1}{L}\sum_{k=1}^L \sqrt{2} < 2.
+\end{align*}
+The fact that the gradient summary $G$ is less than two is important because, for $x\leq 1$, we have that $\log(1+x) \geq x \log 2$. In turn, this implies that since $G<2$, we have that $\eta = \log \frac{1+\sqrt{1+4G}}{2} \geq \frac{\sqrt{1+4G} - 1}{2} \log 2$. It will also be important to know that for $G<2$, we have that $\half\cdot G \leq \tfrac{\sqrt{1+4G} - 1}{2} \leq G$. 
+
+With these bounds in hand, the analysis becomes fairly standard. By an intermediate step in the proof of \cref{thm:log-lr}, the change in objective across a single step is bounded by:
+\begin{align*}
+    \el(\vw+\Delta \vw)- \el(\vw)&\leq - \eta\cdot G + \tfrac{1}{2} \,(\exp \eta -1)^2 \\
+    &\leq - \tfrac{\sqrt{1+4G} - 1}{2} (G \log 2 - \half  \tfrac{\sqrt{1+4G} - 1}{2})\\
+    &\leq -\half \cdot (\log 2 - \half)\cdot G^2
+    \leq -G^2 / 11,
+\end{align*}
+where the second and third inequalities follow by our auxiliary bounds. Letting $G_t$ denote the gradient summary at step $t$, averaging this bound over time steps and applying the telescoping property yields:
+\begin{equation*}
+    \min_{t\in[1,...,T]} G_t^2 \leq \frac{1}{T}\sum_{t=1}^{T} G_t^2 \leq \frac{11}{T}\sum_{t=1}^{T} \el(\vw_t) - \el(\vw_{t+1}) = \frac{11}{T}\cdot (\el(\vw_1) - \el(\vw_T)) \leq \frac{11}{T},
+\end{equation*}
+where the final inequality follows by \cref{lem:objectivebound} and the fact that $\el(\vw_T)\geq0$.
+
+
+\end{proof}
+
+\globalrate*
+\begin{proof}[\mbox{\hyperref[thm:globalrate]{Proof}}]\label{proof:globalrate} 
+
+By \cref{ass:pl}, the gradient summary at time step $t$ must satisfy $G_t \geq \alpha \times \sqrt{2\cdot\el(\vw_t)}$. Therefore the objective at time step $t$ is bounded by $\el(\vw_t) \leq G_t^2/(2\alpha^2)$. Combining with \cref{lem:criticalrate} then yields that:
+\begin{equation*}
+\el(\vw_T) = \min_{t\in[1,...,T]} \el(\vw_t) \leq \frac{1}{2\alpha^2}\min_{t\in[1,...,T]}G_t^2 \leq \frac{6}{\alpha^2T}.
+\end{equation*}
+The proof is complete.
+\end{proof}
+
+\newpage
+\section{PyTorch Implementation}
+\label{app:pytorch}
+
+The following code implements automatic gradient descent in PyTorch \citep{pytorch}. We include a single gain hyperparameter which controls the update size and may be increased from its default value of 1.0 to slightly accelerate training. We emphasise that all the results reported in the paper used a gain of unity.
+
+\inputminted[
+frame=single,
+framesep=2mm,
+]{python}{algorithm/agd.py}
+

@@ -1,0 +1,65 @@
+\section{Introduction}
+
+Automatic differentiation has contributed to the rapid pace of innovation in the field of deep learning. Software packages such as PyTorch \citep{pytorch} and Theano \citep{theano} have advanced a programming paradigm where the user (1) defines a neural network architecture by composing differentiable operators and (2) supplies training data. The package then automatically computes the gradient of the error on the training data via recursive application of the chain rule. At this point, the user must become involved again by (3) selecting one of numerous optimisation algorithms and (4) manually tuning its hyperparameters: in particular, the initial learning rate and the learning rate decay schedule \citep{Goodfellow-et-al-2016}.
+
+But manually tuning hyperparameters is irksome. An abundance of hyperparameters makes it difficult to rank the performance of different deep learning algorithms \citep{Lucic2017AreGC,crowded_valley} and difficult to reproduce results in the literature \citep{deeprlmatters}. Hyperparameters confound our efforts to build a scientific understanding of generalisation in deep learning \citep{jiang2019fantastic, my-margin}. And, when training neural networks at the largest scale, in pursuit of stronger forms of artificial intelligence, hyperparameter grid search can rack up millions of dollars in compute costs \citep{Sharir2020TheCO}. 
+
+Are hyperparameters just a fact of life? The thesis of this paper is that \textit{no: they are not}. Deep learning involves fitting a known function to known data via minimising a known objective. If we could characterise these components both individually and in how they interact, then---in principle---there should be no leftover degrees of freedom to be tuned \citep{tutorial}. Taking this idea and running with it leads to \textit{automatic gradient descent} (AGD): a neural network optimiser without any hyperparameters. AGD is complementary to automatic differentiation and could help to automate general machine learning workflows.
+
+Two existing tools are central to our derivation, and it is their novel combination that presents the main theoretical contribution of this paper. First, a classic tool from convex analysis known as the \textit{Bregman divergence} \citep{bregman1967relaxation,bregman} is used to characterise how the neural network interacts with the loss function. And second, a tool called \textit{deep relative trust} \citep{my-fromage} is used to characterise the highly non-linear interaction between the weights and the network output. With these tools in hand, we can apply the \textit{majorise-minimise meta-algorithm} \citep{mm} to derive an optimiser explicitly tailored to deep network objective functions. To summarise, the derivation of AGD follows three main steps:
+
+\begin{enumerate}[label=Step \arabic*:, leftmargin=*, font=\sffamily]
+    \item \textsf{Functional expansion}. We use a \textit{Bregman divergence} to express the linearisation error of the objective function $\el(\vw)$ in terms of the functional perturbation $\Delta \vf$ to the network $\vf$.
+    \item \textsf{Architectural perturbation bounds.} We use \textit{deep relative trust} to relate the size and structure of the weight perturbation $\Delta \vw$ to the size of the induced functional perturbation $\Delta \vf$.
+    \item \textsf{Majorise-minimise.} We substitute deep relative trust into the Bregman divergence to obtain an explicitly architecture-dependent majorisation. Minimising with respect to $\Delta \vw$ yields an optimiser.
+\end{enumerate}
+
+\paragraph{Summary of contributions} This paper derives automatic gradient descent (AGD) by applying the majorise-minimise meta-algorithm to deep network objective functions. AGD trains all tested network architectures without hyperparameters, and scales to deep networks such as ResNet-50 and large datasets such as ImageNet. AGD trains out-of-the-box even when Adam and SGD fail to train with their default hyperparameters.
+
+\input{figures/comparison-table}
+
+\subsection{Related work}
+
+\paragraph{Optimisation theory} First-order optimisers leverage the first-order Taylor expansion of the objective function $\el(\vw)$---in particular, the gradient $\nabla_\vw\el(\vw)$. Theoretical treatments include mirror descent \citep{nemirovsky_yudin_1983}, 
+natural gradient descent \citep{amari} and the Gauss-Newton method \citep{gauss-newton}. These methods have been explored in the context of deep learning \citep{revisiting-ngd,azizan2018stochastic,sun2022mirror}. First-order methods are amenable to deep learning since the gradient of the objective is available via recursive application of the chain rule---a.k.a.\ error back-propagation \citep{Rumelhart1986LearningRB}.
+
+Second-order optimisers leverage the second-order Taylor expansion of the objective function $\el(\vw)$---in particular, the gradient $\nabla_\vw\el(\vw)$ and Hessian $\nabla^2_\vw\el(\vw)$. Examples include Newton's method \citep{Nocedal1999NumericalO} and cubic-regularised Newton's method \citep{Nesterov2006CubicRO}. Naïvely, second-order methods are less amenable to deep learning since the cost of the relevant Hessian computations is prohibitive at high dimension. That being said, efforts have been made to circumvent this issue \citep{hessian-linear}.
+
+The majorise-minimise meta-algorithm \citep{mm} is an algorithmic pattern that can be used to derive optimisers. To apply the meta-algorithm, one must first derive an upper bound on the objective which matches the objective up to $k$th-order in its Taylor series for some integer $k$. This \textit{majorisation} can then be minimised as a proxy for reducing the original objective. \cref{fig:maj-min} illustrates the meta-algorithm for $k=1$.
+
+\paragraph{Deep learning theory} The \textit{Lipschitz smoothness assumption}---a global constraint on the eigenvalues of the Hessian---is often used to derive and analyse neural network optimisers \citep{Agarwal2016FindingAL}. But this assumption has been questioned \citep{Zhang2020Why} and evidence has even been found for the reverse relationship, where the Hessian spectrum is highly sensitive to the choice of optimiser \citep{cohen2021gradient}.
+
+These considerations motivate the development of theory that is more explicitly tailored to neural architecture. For instance, \citet{my-fromage} used an architectural perturbation bound termed \textit{deep relative trust} to characterise the neural network optimisation landscape as a function of network depth. Similarly, \citet{Yang2021TensorPI} sought to understand the role of width, leading to their \textit{maximal update parameterisation}. \cref{tab:practice,tab:theory} provide some points of comparison between automatic gradient descent and these and other frameworks.
+
+\input{figures/schematic}
+
+\subsection{Preliminaries}
+
+Given a vector $\vv$ in $\R^n$, we will need to measure its size in three different ways:
+
+\begin{definition}[Manhattan norm] The \textit{Manhattan norm} $\norm{\,\cdot\,}_1$ of a vector $\vv$ is defined by $\norm{\vv}_1 \defeq \sum_{i} \abs{\vv_i}$.
+\end{definition}
+
+\begin{definition}[Euclidean norm] The \textit{Euclidean norm} $\norm{\,\cdot\,}_2$ of a vector $\vv$ is defined by $\smash{\norm{\vv}_2 \defeq \sqrt{\sum_{i} \vv_i^2}}$.
+\end{definition}
+
+\begin{definition}[Infinity norm] The \textit{infinity norm} $\norm{\,\cdot\,}_\infty$ of a vector $\vv$ is defined by $\norm{\vv}_\infty \defeq \max_{i} \abs{\vv_i}$.
+\end{definition}
+
+For a matrix $\mM$ in $\R^{m \times n}$, the reader should be aware that it has a singular value decomposition:
+\begin{fact}[SVD] Every matrix $\mM$ in $\R^{m\times n}$ admits a \textit{singular value decomposition} (SVD) of the form $\mM = \sum_{i=1}^{\min(m,n)} \sigma_i(\mM) \cdot \vu_i \vv_i^\top$ where the \textit{left singular vectors} $\{\vu_i\}$ are orthonormal vectors in $\R^{m}$, the \textit{right singular vectors} $\{\vv_i\}$ are orthonormal vectors in $\R^{m}$ and the \textit{singular values} $\{\sigma_i(\mM)\}$ are non-negative scalars.
+\end{fact}
+
+The singular value decomposition allows us to measure the size of a matrix in two different ways:
+
+\begin{definition}[Frobenius norm] The \textit{Frobenius norm} $\norm{\,\cdot\,}_F$ of a matrix $\mM$ is given by $\norm{\mM}_F \defeq \sqrt{\sum_{i} \sigma_i(\mM)^2}$.
+\end{definition}
+\begin{definition}[Operator norm] The \textit{operator norm} $\norm{\,\cdot\,}_*$ of a matrix $\mM$ is given by $\norm{\mM}_* \defeq \max_i \sigma_i(\mM)$.
+\end{definition}
+While the operator norm $\norm{\mM}_*$ reports the largest singular value, the quantity $\norm{\mM}_F / \sqrt{\min(m,n)}$ reports the root mean square singular value. Finally, we will need to understand two aspects of matrix conditioning:
+\begin{definition}[Rank] The \textit{rank} of a matrix counts the number of non-zero singular values.
+\end{definition}
+\begin{definition}[Stable rank]
+The \textit{stable rank} of a matrix $\mM$ is defined by $\srank \mM \defeq \norm{\mM}_F^2 / \norm{\mM}_*^2$.
+\end{definition}
+The stable rank provides an approximation to the rank that ignores the presence of very small singular values. Let us consider the extremes. An orthogonal matrix $\mO\in\R^{m\times n}$ has both full rank and full stable rank: $\rank \mO = \srank \mO = \min(m,n)$. A rank-one matrix $\mP$ has unit stable rank and satisfies $\norm{\mP}_* = \norm{\mP}_F$.

@@ -1,0 +1,43 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{import} \PYG{n+nn}{math}
+\PYG{k+kn}{import} \PYG{n+nn}{torch}
+
+\PYG{k+kn}{from} \PYG{n+nn}{torch.nn.init} \PYG{k+kn}{import} \PYG{n}{orthogonal\PYGZus{}}
+
+\PYG{k}{def} \PYG{n+nf}{singular\PYGZus{}value}\PYG{p}{(}\PYG{n}{p}\PYG{p}{):}
+    \PYG{n}{sv} \PYG{o}{=} \PYG{n}{math}\PYG{o}{.}\PYG{n}{sqrt}\PYG{p}{(}\PYG{n}{p}\PYG{o}{.}\PYG{n}{shape}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]} \PYG{o}{/} \PYG{n}{p}\PYG{o}{.}\PYG{n}{shape}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{])}
+    \PYG{k}{if} \PYG{n}{p}\PYG{o}{.}\PYG{n}{dim}\PYG{p}{()} \PYG{o}{==} \PYG{l+m+mi}{4}\PYG{p}{:}
+        \PYG{n}{sv} \PYG{o}{/=} \PYG{n}{math}\PYG{o}{.}\PYG{n}{sqrt}\PYG{p}{(}\PYG{n}{p}\PYG{o}{.}\PYG{n}{shape}\PYG{p}{[}\PYG{l+m+mi}{2}\PYG{p}{]} \PYG{o}{*} \PYG{n}{p}\PYG{o}{.}\PYG{n}{shape}\PYG{p}{[}\PYG{l+m+mi}{3}\PYG{p}{])}
+    \PYG{k}{return} \PYG{n}{sv}
+
+\PYG{k}{class} \PYG{n+nc}{AGD}\PYG{p}{:}
+    \PYG{n+nd}{@torch}\PYG{o}{.}\PYG{n}{no\PYGZus{}grad}\PYG{p}{()}
+    \PYG{k}{def} \PYG{n+nf+fm}{\PYGZus{}\PYGZus{}init\PYGZus{}\PYGZus{}}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{net}\PYG{p}{,} \PYG{n}{gain}\PYG{o}{=}\PYG{l+m+mf}{1.0}\PYG{p}{):}
+
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{net} \PYG{o}{=} \PYG{n}{net}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{depth} \PYG{o}{=} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n+nb}{list}\PYG{p}{(}\PYG{n}{net}\PYG{o}{.}\PYG{n}{parameters}\PYG{p}{()))}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{gain} \PYG{o}{=} \PYG{n}{gain}
+
+        \PYG{k}{for} \PYG{n}{p} \PYG{o+ow}{in} \PYG{n}{net}\PYG{o}{.}\PYG{n}{parameters}\PYG{p}{():}
+            \PYG{k}{if} \PYG{n}{p}\PYG{o}{.}\PYG{n}{dim}\PYG{p}{()} \PYG{o}{==} \PYG{l+m+mi}{1}\PYG{p}{:} \PYG{k}{raise} \PYG{n+ne}{Exception}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Biases are not supported.\PYGZdq{}}\PYG{p}{)}
+            \PYG{k}{if} \PYG{n}{p}\PYG{o}{.}\PYG{n}{dim}\PYG{p}{()} \PYG{o}{==} \PYG{l+m+mi}{2}\PYG{p}{:} \PYG{n}{orthogonal\PYGZus{}}\PYG{p}{(}\PYG{n}{p}\PYG{p}{)}
+            \PYG{k}{if} \PYG{n}{p}\PYG{o}{.}\PYG{n}{dim}\PYG{p}{()} \PYG{o}{==} \PYG{l+m+mi}{4}\PYG{p}{:}
+                \PYG{k}{for} \PYG{n}{kx} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{p}\PYG{o}{.}\PYG{n}{shape}\PYG{p}{[}\PYG{l+m+mi}{2}\PYG{p}{]):}
+                    \PYG{k}{for} \PYG{n}{ky} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{p}\PYG{o}{.}\PYG{n}{shape}\PYG{p}{[}\PYG{l+m+mi}{3}\PYG{p}{]):}
+                        \PYG{n}{orthogonal\PYGZus{}}\PYG{p}{(}\PYG{n}{p}\PYG{p}{[:,:,}\PYG{n}{kx}\PYG{p}{,}\PYG{n}{ky}\PYG{p}{])}
+            \PYG{n}{p} \PYG{o}{*=} \PYG{n}{singular\PYGZus{}value}\PYG{p}{(}\PYG{n}{p}\PYG{p}{)}
+
+    \PYG{n+nd}{@torch}\PYG{o}{.}\PYG{n}{no\PYGZus{}grad}\PYG{p}{()}
+    \PYG{k}{def} \PYG{n+nf}{step}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{):}
+
+        \PYG{n}{G} \PYG{o}{=} \PYG{l+m+mi}{0}
+        \PYG{k}{for} \PYG{n}{p} \PYG{o+ow}{in} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{net}\PYG{o}{.}\PYG{n}{parameters}\PYG{p}{():}
+            \PYG{n}{G} \PYG{o}{+=} \PYG{n}{singular\PYGZus{}value}\PYG{p}{(}\PYG{n}{p}\PYG{p}{)} \PYG{o}{*} \PYG{n}{p}\PYG{o}{.}\PYG{n}{grad}\PYG{o}{.}\PYG{n}{norm}\PYG{p}{(}\PYG{n}{dim}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{))}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{()}
+        \PYG{n}{G} \PYG{o}{/=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{depth}
+
+        \PYG{n}{log} \PYG{o}{=} \PYG{n}{math}\PYG{o}{.}\PYG{n}{log}\PYG{p}{(}\PYG{l+m+mf}{0.5} \PYG{o}{*} \PYG{p}{(}\PYG{l+m+mi}{1} \PYG{o}{+} \PYG{n}{math}\PYG{o}{.}\PYG{n}{sqrt}\PYG{p}{(}\PYG{l+m+mi}{1} \PYG{o}{+} \PYG{l+m+mi}{4}\PYG{o}{*}\PYG{n}{G}\PYG{p}{)))}
+
+        \PYG{k}{for} \PYG{n}{p} \PYG{o+ow}{in} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{net}\PYG{o}{.}\PYG{n}{parameters}\PYG{p}{():}
+            \PYG{n}{factor} \PYG{o}{=} \PYG{n}{singular\PYGZus{}value}\PYG{p}{(}\PYG{n}{p}\PYG{p}{)} \PYG{o}{/} \PYG{n}{p}\PYG{o}{.}\PYG{n}{grad}\PYG{o}{.}\PYG{n}{norm}\PYG{p}{(}\PYG{n}{dim}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{),} \PYG{n}{keepdim}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{)}
+            \PYG{n}{p} \PYG{o}{\PYGZhy{}=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{gain} \PYG{o}{*} \PYG{n}{log} \PYG{o}{/} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{depth} \PYG{o}{*} \PYG{n}{factor} \PYG{o}{*} \PYG{n}{p}\PYG{o}{.}\PYG{n}{grad}
+\end{Verbatim}

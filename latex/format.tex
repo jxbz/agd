@@ -1,0 +1,99 @@
+% References
+\renewcommand*{\backrefalt}[4]{\ifcase #1 No citations. \or Cited on page #2. \else Cited on pages #2. \fi}
+
+% Page numbers
+\fancypagestyle{empty}{\fancyhf{}}
+\fancypagestyle{plain}{\fancyfoot[C]{\sffamily\selectfont\thepage}}
+\pagestyle{plain}
+
+% Captions
+\renewcommand\AlCapFnt{\bf\sffamily}
+\captionsetup[figure]{labelfont={bf,sf}}
+\captionsetup[table]{labelfont={bf,sf}}
+\newcommand{\captiontitle}[1]{\textsf{\textbf{#1}}}
+
+% Paragraph
+\makeatletter
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}{0ex \@plus1ex \@minus.2ex}{-1em}{\bfseries\sffamily}}
+\makeatother
+
+% Theorem
+\makeatletter
+\xpatchcmd \thmt@restatable{\thmt@toks{}}
+{\def\thmt@tmp@restatename{#3}\thmt@toks{}}{}{\fail}
+
+\renewtheoremstyle{plain}{}
+  {\item[\ifcsname thmt@tmp@restatename\endcsname
+        \ifthmt@thisistheone\hskip\labelsep\mbox{\hyperref[proof:\thmt@tmp@restatename]{\bf\sffamily ##1\ ##2}} \fi
+  \else \hskip\labelsep\bf\sffamily ##1\ ##2 \fi \normalfont\sffamily(##3)\theorem@separator]}
+\makeatother
+
+\theoremstyle{plain}
+\theorembodyfont{\normalfont}
+\newtheorem{approximation}{Approximation}
+
+\theoremstyle{plain}
+\theorembodyfont{\normalfont}
+\newtheorem{fact}{Fact}
+
+\theoremstyle{plain}
+\theorembodyfont{\normalfont}
+\newtheorem{prescription}{Prescription}
+\crefname{prescription}{Prescription}{Prescriptions}
+
+\theoremstyle{plain}
+\theorembodyfont{\normalfont}
+\newtheorem{proposition}{Proposition}
+
+\theoremstyle{plain}
+\theorembodyfont{\normalfont}
+\newtheorem{theorem}{Theorem}
+
+\theoremstyle{plain}
+\theorembodyfont{\normalfont}
+\newtheorem{lemma}{Lemma}
+
+\theoremstyle{plain}
+\theorembodyfont{\normalfont}
+\newtheorem{corollary}{Corollary}
+
+\theoremstyle{plain}
+\theorembodyfont{\normalfont}
+\newtheorem{ansatz}{Ansatz}
+
+\theoremstyle{plain}
+\theorembodyfont{\normalfont}
+\newtheorem{assumption}{Assumption}
+\crefname{assumption}{Assumption}{Assumptions}
+
+\theoremstyle{plain}
+\theorembodyfont{\normalfont}
+\newtheorem{definition}{Definition}
+
+\theoremstyle{plain}
+\theorembodyfont{\normalfont}
+\newtheorem{example}{Example}
+
+% Algorithm
+\newcommand{\WCOMMENT}[1]{\hfill\begin{minipage}{20em}\COMMENT{#1}\end{minipage}}
+\SetAlCapSkip{1em}
+\SetKwComment{Comment}{\small$\#$ }{}
+
+\algrenewcommand\algorithmicindent{2.0em}
+
+\renewcommand\algorithmicdo{}
+\renewcommand\algorithmicthen{}
+
+
+\algrenewcommand\alglinenumber[1]{\sffamily\footnotesize #1.}
+
+\algblockdefx[DEF]{DEF}{ENDDEF}%
+    [1][function]{\textbf{def} \texttt{#1()}:}
+    
+\makeatletter
+\ifthenelse{\equal{\ALG@noend}{t}}{\algtext*{ENDDEF}}
+\makeatother
+
+\makeatletter
+\xpatchcmd{\algorithmic}{\labelsep 0.5em}{\labelsep 1.0em}{\typeout{Success!}}{\typeout{Oh dear!}}
+\makeatother

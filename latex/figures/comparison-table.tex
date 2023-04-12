@@ -1,0 +1,20 @@
+\begin{table}
+    \centering
+    \begin{tabularx}{\textwidth}{lXccccc}
+        \toprule
+        \textbf{Optimiser} &
+        \textbf{Reference} & 
+        \makecell{\textbf{Hyperparameter}\\\textbf{Free}} &
+        \makecell{\textbf{Width}\\\textbf{Scaling}} & \makecell{\textbf{Depth}\\\textbf{Scaling}} &  
+        \makecell{\textbf{Automatic}\\\textbf{Schedule}} & 
+        \makecell{\textbf{Memory}\\\textbf{Cost}} \\ 
+        \midrule
+        Adam    & $\mathrlap{\text{\citet{kingma_adam:_2015}}}$ & \xmark & \xmark & \xmark & \xmark & $3 \times \#$weights\\
+        SGD + mom.     & $\mathrlap{\text{\citet{bottou}}}$ & \xmark & \xmark & \xmark & \xmark & $2\times\#$weights\\
+        SGD + muP     & $\mathrlap{\text{\citet{Yang2021TensorPI}}}$ & \xmark & \cmark & \xmark & \xmark & $1\times\#$weights\\
+        AGD     & this paper                & \cmark & \cmark & \cmark & \cmark & $1\times\#$weights\\ 
+        \bottomrule
+    \end{tabularx}
+    \caption{\captiontitle{Comparing practical optimisers.} Adam and momentum-SGD employ running estimates of gradient statistics and thereby use more memory than AGD. In addition, Adam and SGD do not provide guidance on scaling hyperparameters with network architecture, although muP fixes this for the case of width scaling.}
+    \label{tab:practice}
+\end{table}

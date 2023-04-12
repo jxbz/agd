@@ -1,0 +1,132 @@
+\section{Majorise-Minimise for Deep Learning Problems}
+\label{sec:mm-dnn}
+
+In this section, we will focus our efforts on deriving an optimiser for deep fully-connected networks trained with square loss. The derivation for cross-entropy loss is analogous. Proofs are relegated to \cref{app:proofs}. 
+
+\begin{definition}[Fully-connected network]\label{def:dln}
+A \textit{fully-connected network (FCN)} $\vf$ of depth $L$ maps an input $\vx\in\R^{d_0}$ to an output $\vf(\vx;\vw) \in \R^{d_L}$ via $L$ matrix multiplications interspersed by non-linearity $\relu(z) \defeq \max(0,z)$:
+\begin{equation*}
+\vf(\vx; \vw) \coloneqq \mW_L\circ(\relu{}\circ \mW_{L - 1}) \circ(\relu{}\circ \mW_{L - 2}) \circ \dots  \circ (\relu{} \circ \mW_1 \vx).
+\end{equation*}
+\end{definition}
+
+In this expression, $\vw$ denotes the tuple of matrices $\vw = (\mW_1,...,\mW_L)$ with $k$th matrix $\mW_k$ in $\R^{d_k\times d_{k-1}}$. In what follows, we will find the following dimensional scaling to be particularly convenient:
+\begin{prescription}[Dimensional scaling]\label{prescription:norm} For $\eta>0$, the data $(\vx,\vy)$, weights $\mW_k$ and updates $\Delta\mW_k$ should obey:
+\begin{align*}
+    \norm{\vx}_2 &= \sqrt{d_0}; \tag{input scaling} \\
+    \norm{\mW_k}_* &= \sqrt{d_k/d_{k-1}} \hspace{1.519em}\qquad\text{for all }k=1,...,L; \tag{weight scaling} \\
+    \norm{\Delta \mW_k}_* &= \sqrt{d_k/d_{k-1}} \cdot \tfrac{\eta}{L} \qquad\text{for all }k=1,...,L; \tag{update scaling}\\
+    \norm{\vy}_2 &= \sqrt{d_L}. \tag{target scaling}
+\end{align*}
+\end{prescription}
+While results can be derived without adopting \cref{prescription:norm}, the scalings substantially simplify our formulae. One reason for this is that, under \cref{prescription:norm}, we have the telescoping property that $\prod_{k=1}^L \norm{\mW_k}_* = \sqrt{d_L/d_0}$. For a concrete example of how this helps, consider the following bound on the norm of the network outputs:
+
+\begin{restatable}[Output bound]{lemma}{outbound}
+\label{lem:outbound} The output norm of a fully-connected network $\vf$ obeys the following bound:
+\begin{align*}
+    \norm{\vf(\vx;\vw)}_2 &\leq \left[\prod_{k=1}^L \norm{\mW_k}_* \right] \times \norm{\vx}_2 = \sqrt{d_L} \text{ under \cref{prescription:norm}}.
+\end{align*}
+\end{restatable}
+
+So, under \cref{prescription:norm}, the bound is simple. Furthermore, the scaling of the update with a single parameter $\eta$ reduces the problem of solving for an optimiser to a single parameter problem. To see how this might make life easier, consider the following lemma that relates weight perturbations to functional perturbations:
+
+\begin{restatable}[Deep relative trust]{lemma}{archbounds}
+\label{lem:deep_perturbation_bounds}
+When adjusting the weights $\vw = (\mW_1,...,\mW_L)$ of a fully-connected network $\vf$ by $\Delta\vw = (\Delta\mW_1,...,\Delta\mW_L)$, the induced functional perturbation $\Delta \vf(\vx)\defeq\vf(\vx;\vw+\Delta\vw)-\vf(\vx;\vw)$ obeys:
+\begin{align*}
+    \norm{\Delta\vf(\vx)}_2 &\leq \left[\prod_{k=1}^L \norm{\mW_k}_* \right] \times \norm{\vx}_2 \times \left[ \prod_{k = 1}^L \left( 1 + \frac{\Vert \Delta \mW_k \Vert_{*}}{\Vert \mW_k \Vert_{*}}\right)  - 1 \right] \leq \sqrt{d_L}\times(\exp \eta - 1) \text{ under \cref{prescription:norm}}.
+\end{align*}
+\end{restatable}
+So, under \cref{prescription:norm}, the single parameter $\eta$ directly controls the size of functional perturbations.
+
+In terms of enforcing \cref{prescription:norm} in practice, the norms of the data $(\vx,\vy)$ may be set via pre-processing, the norm of the update $\Delta \mW_k$ may be set via the optimisation algorithm and the norm of the weight matrix $\mW_k$ may be set by the choice of initialisation. While, yes, $\norm{\mW_k}_*$ may drift during training, the amount that this can happen is limited by \citet{Weyl1912}'s inequality for singular values. In particular, after one step the perturbed operator norm $\norm{\mW_k + \Delta \mW_K}_*$ is sandwiched like $(1-\eta/L) \cdot \norm{\mW_k}_* \leq \norm{\mW_k + \Delta \mW_K}_* \leq (1+\eta/L) \cdot\norm{\mW_k}_*$.
+
+\input{algorithm/agd}
+
+\subsection{Deriving automatic gradient descent}
+
+With both functional majorisation and deep relative trust in hand, we can majorise the deep network objective:
+
+
+
+\begin{restatable}[Exponential majorisation]{lemma}{majordnn}\label{lem:sq-major-nn}
+For an FCN with square loss, under \cref{ass:orthog} and \cref{prescription:norm}:
+    \begin{equation*}
+        \el(\vw+\Delta \vw) \leq \el(\vw) + \frac{\eta}{L}\sum_{k=1}^L\left[\sqrt{d_k/d_{k-1}} \times\trace\frac{\Delta \mW_k^\top\nabla_{\mW_k}\el}{\norm{\Delta \mW_k}_*}\right] + \tfrac{1}{2} \,(\exp \eta -1)^2.
+    \end{equation*}
+\end{restatable}
+
+Observe that the majorisation only depends on the magnitude of the scalar $\eta$ and on some notion of angle $\trace\Delta \mW_k^\top\nabla_{\mW_k}\el/\norm{\Delta \mW_k}_*$ between the perturbation matrix $\Delta \mW_k$ and the gradient matrix $\nabla_{\mW_k}\el$. To derive an optimiser, we would now like to minimise this majorisation with respect to $\eta$ and this angle. First, let us introduce one additional assumption and one additional definition:
+\begin{assumption}[Gradient conditioning]\label{approx:g-cond} The gradient satisfies $\srank\nabla_{\mW_k}\el=1$ at all layers $k=1,...,L$.
+\end{assumption}
+This assumption implies that the Frobenius norm $\norm{\nabla_{\mW_k}\el}_F$ and operator norm $\norm{\nabla_{\mW_k}\el}_*$ of the gradient at layer $k$ are equal. It is not immediately obvious why this should be a good assumption. After all, the gradient is a sum of $\abs{\set{S}}$ rank-one matrices: $\nabla_{\mW_k}\el = \tfrac{1}{\abs{\set{S}}} \sum_{(\vx,\vy)\in\set{S}} \nabla_{\vh_k}\ell(\vf(\vx),\vy) \otimes \vh_{k-1}$, where $\vh_{k-1}(\vx)$ and $\vh_k(\vx)$ denote the inputs and outputs of the weight matrix $\mW_k$ at layer $k$, and $\otimes$ denotes the outer product. So, naïvely, one might expect the gradient $\nabla_{\mW_k}\el$ to have a stable rank of $\min(d_k,d_{k-1},\abs{\set{S}})$. But it turns out to be a good assumption in practice \citep{Yang2021TensorPI,yang2021tuning}. And for the definition:
+
+\begin{definition}[Gradient summary]\label{def:gsummary}
+At a weight setting $\vw$, the \textit{gradient summary} $G$ is given by:
+\begin{align*}
+        G & \defeq \frac{1}{L}\sum_{k=1}^L \sqrt{d_k/d_{k-1}} \cdot \norm{ \nabla_{\mW_k} \el(\vw)}_F.
+\end{align*}
+\end{definition}
+The gradient summary is a weighted average of gradient norms over layers. It can be thought of as a way to measure the size of the gradient while accounting for the fact that the weight matrices at different layers may be on different scales. This is related to the concept of the \textit{gradient scale coefficient} of \citet{Philipp2017TheEG}.
+
+We now have everything we need to derive automatic gradient descent via the majorise-minimise principle:
+
+\begin{restatable}[Automatic gradient descent]{theorem}{loglr}\label{thm:log-lr}
+For a deep fully-connected network, under \cref{ass:orthog,approx:g-cond} and \cref{prescription:norm}, the majorisation of square loss given in \cref{lem:sq-major-nn} is minimised by setting:
+\begin{align*}
+    \eta = \log\frac{1 + \sqrt{1+4G}}{2},\qquad
+    \Delta \mW_k = - \frac{\eta}{L}\cdot \sqrt{d_k/d_{k-1}} \cdot\frac{\nabla_{\mW_k} \el}{\norm{\nabla_{\mW_k} \el}_F}, \qquad \text{for all layers } k=1,...,L.
+\end{align*}
+\end{restatable}
+
+We present pseudocode for this theorem in \cref{alg:agd}, and a PyTorch implementation in \cref{app:pytorch}. Via a simple derivation based on clear algorithmic principles, automatic gradient descent unifies various heuristic and theoretical ideas that have appeared in the literature:
+\begin{itemize}[leftmargin=*]
+    \item \textit{Relative updates.} The update is scaled relative to the norm of the weight matrix to which it is applied---assuming the weight matrices are scaled according to \cref{prescription:norm}. Such a scaling was proposed by \citet{You:EECS-2017-156} and further explored by \citet{carbonnelle2019layer} and \citet{my-fromage}. There is evidence that such relative synaptic updates may occur in neuroscience \citep{Loewenstein9481}.
+    \item \textit{Depth scaling.} Scaling the perturbation strength like $1/L$ for networks of depth $L$ was proposed on theoretical grounds by \citet{my-fromage} based on analysis via deep relative trust.
+    \item \textit{Width scaling.} The dimensional factors of $d_k$ and $d_{k-1}$ that appear closely relate to the maximal update parameterisation of \citet{Yang2021TensorPI} designed to ensure hyperparameter transfer across network width.
+    \item \textit{Gradient clipping.} The logarithmic dependence of the update on the gradient summary may be seen as an automatic form of \textit{adaptive gradient clipping} \citep{pmlr-v139-brock21a}---a technique which clips the gradient once its magnitude surpasses a certain threshold set by a hyperparameter.
+\end{itemize}
+
+\subsection{Convergence analysis}
+
+This section presents theoretical convergence rates for automatic gradient descent. While the spirit of the analysis is standard in optimisation theory, the details may still prove interesting for their detailed characterisation of the optimisation properties of deep networks. For instance, we propose a novel Polyak-Łojasiewicz inequality tailored to the operator structure of deep networks. We begin with two observations:
+
+\begin{restatable}[Bounded objective]{lemma}{objectivebound}\label{lem:objectivebound}
+For square loss, the objective is bounded as follows:
+\begin{align*}
+    \el(\vw) &\leq \frac{1}{\abs{\set{S}}} \sum_{(\vx,\vy)\in \set{S}}\frac{\norm{\vf(\vx;\vw)}_2^2 +\norm{\vy}_2^2}{2d_L} \leq 1 \text{ under \cref{prescription:norm}.}
+\end{align*}
+\end{restatable}
+
+\begin{restatable}[Bounded gradient]{lemma}{gradientbound}\label{lem:gradientbound}
+For square loss, the norm of the gradient at layer $k$ is bounded as follows:
+\begin{align*}
+    \norm{\nabla_{\mW_k}\el}_F &\leq \frac{\prod_{l=1}^L\norm{\mW_l}_*}{\norm{\mW_k}_*} \cdot \sqrt{\frac{2\el(\vw)}{d_L}} \cdot \sqrt{\frac{1}{\abs{\set{S}}} \sum_{(\vx,\vy)\in \set{S}}\norm{\vx}_2^2} \leq \sqrt{2\cdot\frac{d_{k-1}}{d_k}} \text{ under \cref{prescription:norm}.}
+\end{align*}
+\end{restatable}
+
+These results help us prove that automatic gradient descent converges to a point where the gradient vanishes:
+
+\begin{restatable}[Convergence rate to critical point]{lemma}{criticalrate}\label{lem:criticalrate}
+Consider a fully-connected network trained by automatic gradient descent (\cref{thm:log-lr}) and square loss for $T$ iterations. Let $G_t$ denote the gradient summary (\cref{def:gsummary}) at step $t\leq T$. Under \cref{ass:orthog,approx:g-cond} and \cref{prescription:norm}, AGD converges at the following rate:\vspace{-0.5em}
+\begin{equation*}
+    \min_{t\in\{1,...,T\}} G_t^2 \leq \frac{11}{T}.
+\end{equation*}
+\end{restatable}
+
+This lemma can be converted into a convergence rate to a global minimum with one additional assumption:
+
+\begin{assumption}[Deep Polyak-Łojasiewicz inequality] \label{ass:pl}
+For some $\alpha>0$, the gradient norm is lower bounded by:
+\begin{align*}
+    \norm{\nabla_{\mW_k}\el}_F &\geq \alpha \times \frac{\prod_{l=1}^L\norm{\mW_l}_*}{\norm{\mW_k}_*} \cdot \sqrt{\frac{2\el(\vw)}{d_L}} \cdot \sqrt{\frac{1}{\abs{\set{S}}} \sum_{(\vx,\vy)\in \set{S}}\norm{\vx}_2^2} = \alpha \times \sqrt{2\cdot\el(\vw)\cdot\frac{d_{k-1}}{d_k}} \text{ under \cref{prescription:norm}.}
+\end{align*}
+\end{assumption}
+This lower bound mirrors the structure of the upper bound in \cref{lem:gradientbound}. The parameter $\alpha$ captures how much of the gradient is attenuated by small singular values in the weights and by deactivated $\relu$ units. While Polyak-Łojasiewicz inequalities are common in the literature \citep{LIU202285}, our assumption is novel in that it pays attention to the operator structure of the network. \cref{ass:pl} leads to the following theorem:
+
+\begin{restatable}[Convergence rate to global minima]{theorem}{globalrate}\label{thm:globalrate}
+For automatic gradient descent (\cref{thm:log-lr}) in the same setting as \cref{lem:criticalrate} but with the addition of \cref{ass:pl}, the mean squared error objective at step $T$ obeys:
+\begin{align*}
+    \el(\vw_T) \leq \frac{1}{\alpha^2}\times\frac{6}{T}.
+\end{align*}
+\end{restatable}

@@ -1,0 +1,205 @@
+\newcommand{\cmark}{\textcolor{green!80!black}{\ding{51}}}
+\newcommand{\xmark}{\textcolor{red!80!black}{\ding{55}}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\DeclareMathOperator*{\bi}{{(i)}}
+\newcommand{\defeq}{\vcentcolon=}
+\newcommand{\el}{\mathcal{L}}
+\newcommand\mydots{\makebox[1em][c]{.\hfil.\hfil.}}
+
+\newcommand{\softmax}{\operatorname{softmax}}
+\newcommand{\relu}{\operatorname{relu}}
+\newcommand{\bregman}{\operatorname{bregman}}
+\newcommand{\kl}{D_\mathrm{KL}}
+\newcommand{\vect}{\operatorname{vec}}
+
+%%% Annotation
+
+\newcommand{\kevin}[1]{\textcolor{red}{[Kevin: #1]}}
+\newcommand{\chris}[1]{\textcolor{blue}{[Chris: #1]}}
+
+%%% Macros
+
+% Constants
+
+\newcommand{\econst}{\mathrm{e}}
+\newcommand{\iunit}{\mathrm{i}}
+
+% Abbreviations
+
+\newcommand{\eps}{\varepsilon}
+\newcommand{\oldphi}{\phi}
+\renewcommand{\phi}{\varphi}
+
+% Typesetting
+
+\newcommand{\vct}[1]{\bm{#1}}
+\newcommand{\mtx}[1]{\bm{#1}}
+\newcommand{\set}[1]{\mathsf{#1}}
+\newcommand{\coll}[1]{\mathcal{#1}}
+
+\newcommand{\half}{\tfrac{1}{2}}
+
+% Sets
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Sph}{\mathbb{S}}
+% \renewcommand{\C}{\mathbb{C}}
+\newcommand{\F}{\mathbb{F}}
+
+\newcommand{\Sym}{\mathbb{H}}
+
+\newcommand{\comp}{\textsf{c}}
+
+% Elementary functions
+
+\newcommand{\sign}{\operatorname{sign}}
+\newcommand{\erf}{\operatorname{erf}}
+\newcommand{\Normal}{\operatorname{Normal}}
+\newcommand{\Orthant}{\operatorname{Orthant}}
+
+% Asymptotics
+
+\newcommand{\bigO}{O}
+
+% Linear algebra
+
+\newcommand{\range}{\operatorname{range}}
+\newcommand{\nullsp}{\operatorname{null}}
+
+\newcommand{\lspan}{\operatorname{lin}}
+
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\srank}{\operatorname{rank_{stable}}}
+\newcommand{\trace}{\operatorname{tr}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\Id}{\mathbf{I}}
+
+\newcommand{\pinv}{\dagger}
+
+\newcommand{\psdle}{\preccurlyeq}
+\newcommand{\psdge}{\succcurlyeq}
+\newcommand{\psdlt}{\prec}
+\newcommand{\psdgt}{\succ}
+
+% Mensuration
+
+\newcommand{\abs}[1]{\vert {#1} \vert}
+\newcommand{\norm}[1]{\Vert {#1} \Vert}
+\newcommand{\ip}[2]{\langle {#1}, \ {#2} \rangle}
+\newcommand{\absip}[2]{\abs{\ip{#1}{#2}}}
+
+\newcommand{\abssq}[1]{\abs{#1}^2}
+\newcommand{\pnorm}[2]{\norm{#2}_{#1}}
+\newcommand{\normsq}[1]{\norm{#1}^2}
+\newcommand{\fnorm}[1]{\norm{#1}_{\mathrm{F}}}
+\newcommand{\specnorm}[1]{\Vert #1 \Vert_{*}}
+\newcommand{\fnormsq}[1]{\norm{#1}_{\mathrm{F}}^2}
+
+\newcommand{\labs}[1]{\left\vert {#1} \right\vert}
+\newcommand{\lnorm}[1]{\left\Vert {#1} \right\Vert}
+
+% Calculus
+
+\newcommand{\diff}{\mathrm{d}}
+\newcommand{\idiff}{\,\diff}
+\newcommand{\ddx}[1]{\frac{\diff}{\diff{#1}}}
+\newcommand{\dydx}[2]{\frac{\diff{#1}}{\diff{#2}}}
+\newcommand{\pypx}[2]{\frac{\partial{#1}}{\partial{#2}}}
+
+% Probability
+
+\newcommand{\Expect}{\operatorname{\mathbb{E}}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+
+\newcommand{\Probe}{\mathbb{P}}
+\newcommand{\Prob}[1]{\Probe\left\{ #1 \right\}}
+\newcommand{\Probc}[2]{\Probe_{#1}\left\{ #2 \right\}}
+
+\newcommand{\condbar}{\, \vert \,}
+\newcommand{\lcondbar}{\, \big\vert \,}
+
+\newcommand{\normal}{\textsc{normal}}
+\newcommand{\uniform}{\textsc{uniform}}
+\newcommand{\orthogonal}{\mathrm{orthogonal}}
+
+\newcommand{\comple}{\blacktriangleleft}
+
+
+% Convex analysis
+
+\newcommand{\conv}{\operatorname{conv}}
+
+% Misc
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% BOLD LETTERS FOR VECTORS AND MATRICES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Vectors
+\def\vzero{{\bm{0}}}
+\def\vone{{\bm{1}}}
+\def\vmu{{\bm{\mu}}}
+\def\vtheta{{\bm{\theta}}}
+\def\va{{\bm{a}}}
+\def\vb{{\bm{b}}}
+\def\vc{{\bm{c}}}
+\def\vd{{\bm{d}}}
+\def\ve{{\bm{e}}}
+\def\vf{{\bm{f}}}
+\def\vg{{\bm{g}}}
+\def\vh{{\bm{h}}}
+\def\vi{{\bm{i}}}
+\def\vj{{\bm{j}}}
+\def\vk{{\bm{k}}}
+\def\vl{{\bm{l}}}
+\def\vm{{\bm{m}}}
+\def\vn{{\bm{n}}}
+\def\vo{{\bm{o}}}
+\def\vp{{\bm{p}}}
+\def\vq{{\bm{q}}}
+\def\vr{{\bm{r}}}
+\def\vs{{\bm{s}}}
+\def\vt{{\bm{t}}}
+\def\vu{{\bm{u}}}
+\def\vv{{\bm{v}}}
+\def\vw{{\bm{w}}}
+\def\vx{{\bm{x}}}
+\def\vy{{\bm{y}}}
+\def\vz{{\bm{z}}}
+
+% Matrices
+\def\mA{{\bm{A}}}
+\def\mB{{\bm{B}}}
+\def\mC{{\bm{C}}}
+\def\mD{{\bm{D}}}
+\def\mE{{\bm{E}}}
+\def\mF{{\bm{F}}}
+\def\mG{{\bm{G}}}
+\def\mH{{\bm{H}}}
+\def\mI{{\bm{I}}}
+\def\mJ{{\bm{J}}}
+\def\mK{{\bm{K}}}
+\def\mL{{\bm{L}}}
+\def\mM{{\bm{M}}}
+\def\mN{{\bm{N}}}
+\def\mO{{\bm{O}}}
+\def\mP{{\bm{P}}}
+\def\mQ{{\bm{Q}}}
+\def\mR{{\bm{R}}}
+\def\mS{{\bm{S}}}
+\def\mT{{\bm{T}}}
+\def\mU{{\bm{U}}}
+\def\mV{{\bm{V}}}
+\def\mW{{\bm{W}}}
+\def\mX{{\bm{X}}}
+\def\mY{{\bm{Y}}}
+\def\mZ{{\bm{Z}}}
+\def\mDelta{{\bm{\Delta}}}
+\def\mGamma{{\bm{\Gamma}}}
+\def\mLambda{{\bm{\Lambda}}}
+\def\mPhi{{\bm{\Phi}}}
+\def\mSigma{{\bm{\Sigma}}}

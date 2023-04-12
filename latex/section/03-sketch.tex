@@ -1,0 +1,112 @@
+\section{Majorise-Minimise for Generic Learning Problems}
+\label{sec:mm-ml}
+
+\input{figures/theory-table}
+
+This section develops a framework for applying the majorise-minimise meta-algorithm to generic optimisation problems in machine learning. In particular, the novel technique of \textit{functional expansion} is introduced. \cref{sec:mm-dnn} will apply this technique to deep neural networks. All proofs are supplied in \cref{app:proofs}.
+
+Given a machine learning model and a set of training data, our objective is to minimise the error of the model, averaged over the training data. Formally, we would like to minimise the following function:
+
+\begin{definition}[Composite objective] Consider a machine learning model $\vf$ that maps an input $\vx$ and a weight vector $\vw$ to output $\vf(\vx;\vw)$. Given data $\set{S}$ and a convex loss function $\ell$, the \textit{objective} $\el(\vw)$ is defined by:
+\begin{equation*}
+    \el(\vw) \defeq \frac{1}{|\set{S}|}\sum_{(\vx,\vy) \in \set{S}} \ell(\vf(\vx;\vw), \vy).
+\end{equation*}
+\end{definition}
+We refer to this objective as \textit{composite} since the loss function $\ell$ is \textit{composed} with a machine learning model $\vf$. While the loss function itself is convex, the overall composite is often non-convex due to the non-linear machine learning model. Common convex loss functions include the square loss and the cross-entropy loss:
+
+\begin{example}[Square loss]\label{ex:sq-loss} The \textit{square loss} is defined by: $\ell(\vf(\vx; \vw), \vy) \defeq \frac{1}{2d_L} \norm{\vf(\vx; \vw) - \vy}_2^2$.
+\end{example}
+\begin{example}[Xent loss]\label{ex:xent-loss} The \textit{cross-entropy (xent) loss} is defined by: $\ell(\vf(\vx), \vy) \defeq - \log [\softmax(\vf(\vx))]^\top \vy$, where the softmax function is defined by $\softmax(\vf(\vx))\defeq \exp \vf(\vx) / \norm{\exp \vf(\vx)}_1$.
+\end{example}
+
+\subsection{Decomposition of linearisation error}
+
+First-order optimisers leverage the linearisation of the objective at the current iterate. To design such methods, we must understand the realm of validity of this linearisation. To that end, we derive a very general decomposition of the linearisation error of a machine learning system. The result is stated in terms of a \textit{perturbation hierarchy}. In particular, perturbing the weight vector of a machine learning model $\vw \to \vw + \Delta \vw$ induces perturbations to the model output $\vf \to \vf + \Delta \vf$, to the loss on individual data samples $\ell \to \ell + \Delta \ell$ and, at last, to the overall objective function $\el \to \el + \Delta \el$. Formally, a weight perturbation $\Delta \vw$ induces:
+\begin{flalign*}
+    &\Delta \vf(\vx) &&\coloneqq \vf(\vx;\vw+\Delta \vw) - \vf(\vx; \vw); \hspace{16em} \tag{functional perturbation}\\
+    &\Delta \ell(\vf(\vx), \vy) &&\coloneqq  \ell(\vf(\vx)+\Delta \vf(\vx),\vy) - \ell(\vf(\vx),\vy); \tag{loss perturbation}\\
+    &\Delta \el(\vw) &&\coloneqq \textstyle\frac{1}{|\set{S}|}\sum_{(\vx,\vy) \in \set{S}} \Delta \ell(\vf(\vx), \vy) \tag{objective perturbation}.
+\end{flalign*}
+We have adopted a compact notation where the dependence of $\vf(\vx;\vw)$ on $\vw$ is at times suppressed. The perturbation hierarchies of a generic machine learning model and a deep neural network are visualised in \cref{fig:maj-min,fig:apbs}, respectively. The linearisation error of the objective perturbation $\Delta \el$ decomposes as:
+
+\begin{restatable}[Decomposition of linearisation error]{proposition}{decomposition}\label{thm:decomposition}For any differentiable loss $\ell$ and any differentiable machine learning model $\vf$ the linearisation error of the objective function $\el$ admits the following decomposition:
+    \begin{align*}
+    \quad\quad\quad\underbrace{\Delta \el(\vw) - \nabla_\vw\el(\vw)^\top \Delta \vw}_{\mathclap{\text{linearisation error of objective}}} \quad\quad&= &&\frac{1}{|\set{S}|}\sum_{(\vx,\vy)\in \set{S}} \nabla_{\vf(\vx)} \ell(\vf(\vx),\vy)^\top \underbrace{\left[\Delta \vf(\vx) - \nabla_\vw \vf(\vx) \Delta \vw \right]}_{\mathclap{\text{linearisation error of model}}} \\ &&+\,&\frac{1}{|\set{S}|}\sum_{(\vx,\vy)\in \set{S}}\underbrace{\Delta \ell(\vf(\vx), \vy) -\nabla_{\vf(\vx)}\ell(\vf(\vx),\vy)^\top \Delta \vf(\vx)}_{\text{linearisation error of loss}}.\quad\quad\quad \nonumber
+    \end{align*}
+\end{restatable}
+In words: the linearisation error of the objective decomposes into two terms. The first depends on the linearisation error of the machine learning model and the second the loss. This decomposition relies on nothing but differentiability. For a convex loss, the second term may be interpreted as a Bregman divergence:
+
+\begin{definition}[Bregman divergence of loss]\label{def:bregman} For any convex loss $\ell$:
+\begin{flalign*}
+    \qquad\qquad\qquad\qquad\bregman_{\ell(\cdot,\vy)}(\vf(\vx), \Delta \vf(\vx)) \defeq \Delta \ell(\vf(\vx), \vy) -\nabla_{\vf(\vx)}\ell(\vf(\vx),\vy)^\top \Delta \vf(\vx). &&
+\end{flalign*}
+\end{definition}
+
+ A Bregman divergence is just the linearisation error of a convex function. Two important examples are:
+
+\input{figures/apbs}
+
+\begin{restatable}[Bregman divergence of square loss]{lemma}{squarebreg}\label{lem:sq-bregman}
+When $\ell$ is set to square loss, then:
+\begin{flalign*}
+    \qquad\qquad\qquad\qquad\bregman_{\ell(\cdot,\vy)}(\vf(\vx), \Delta \vf(\vx)) = \tfrac{1}{2d_L} \norm{\Delta \vf(\vx)}_2^2.&&
+\end{flalign*}
+\end{restatable}
+
+\begin{restatable}[Bregman divergence of xent loss]{lemma}{xentbreg} \label{lem:xent-bregman}
+When $\ell$ is set to cross-entropy loss, and if $\vy^\top \bm{1} =1$, then:
+    \begin{flalign*}
+        \qquad\qquad\qquad\qquad\bregman_{\ell(\cdot,\vy)}(\vf(\vx), \Delta \vf(\vx)) &= \kl \Big(\softmax(\vf(\vx))\,\Big|\Big|\, \softmax(\vf(\vx)+\Delta \vf(\vx))\Big)&& \\
+        &\leq \half\norm{\Delta \vf(\vx)}_\infty^2 + \mathcal{O}(\Delta \vf^3).&&
+    \end{flalign*}
+\end{restatable}
+
+Our methods may be applied to other convex losses by calculating or bounding their Bregman divergence.
+
+\subsection{Functional expansion and functional majorisation}
+
+Before continuing, we make one simplifying assumption. Observe that the first term on the right-hand side of \cref{thm:decomposition} is a high-dimensional inner product between two vectors. Since there is no clear reason why these two vectors should be aligned, let us assume that their inner product is zero:
+\begin{assumption}[Orthogonality of model linearisation error]\label{ass:orthog}
+In the same setting as \cref{thm:decomposition}:
+\begin{equation*}
+    \frac{1}{|\set{S}|}\sum_{(\vx,\vy)\in \set{S}} \nabla_{\vf(\vx)} \ell(\vf(\vx),\vy)^\top \underbrace{\left[\Delta \vf(\vx) - \nabla_\vw \vf(\vx) \Delta \vw \right]}_{\mathclap{\text{linearisation error of model}}} = 0.
+\end{equation*}
+\end{assumption}
+
+While it is possible to work without this assumption \citep{bernstein-thesis}, we found that its inclusion simplifies the analysis and in practice did not lead to a discernible weakening of the resulting algorithm. In any case, this assumption is considerably milder than the common assumption in the literature \citep{revisiting-ngd,NEURIPS2019_0d1a9651} that the model linearisation error is itself zero: $\left[\Delta \vf(\vx) - \nabla_\vw \vf(\vx) \Delta \vw \right] = 0$.
+
+Armed with \cref{thm:decomposition} and \cref{ass:orthog}, we are ready to introduce functional expansion and majorisation:
+
+\begin{restatable}[Functional expansion]{theorem}{functmajor}\label{thm:functmajor}Consider a convex differentiable loss $\ell$ and a differentiable machine learning model $\vf$. Under \cref{ass:orthog}, the corresponding composite objective $\el$ admits the expansion:
+    \begin{align*}
+    \el(\vw + \Delta \vw) = \underbrace{\el(\vw) + \nabla_\vw\el(\vw)^\top \Delta \vw}_{\text{first-order Taylor series}} +\frac{1}{|\set{S}|}\sum_{(\vx,\vy)\in \set{S}}\bregman_{\ell(\cdot,\vy)}(\vf(\vx), \Delta \vf(\vx)).
+    \end{align*}
+\end{restatable}
+So the perturbed objective $\el(\vw+\Delta \vw)$ may be written as the sum of its first-order Taylor expansion with a Bregman divergence in the model outputs averaged over the training set.
+It is straightforward to specialise this result to different losses by substituting in their Bregman divergence:
+
+\begin{restatable}[Functional expansion of mean squared error]{corollary}{sqmajor}\label{lem:sq-major} Under \cref{ass:orthog}, for square loss:
+    \begin{flalign*}
+    \qquad\qquad\qquad\qquad\el(\vw + \Delta \vw) = \el(\vw) + \nabla_\vw\el(\vw)^\top \Delta \vw +\frac{1}{|\set{S}|}\sum_{(\vx,\vy)\in \set{S}}\tfrac{1}{2d_L} \norm{\Delta \vf(\vx)}_2^2.&&
+    \end{flalign*}
+\end{restatable}
+
+\begin{restatable}[Functional majorisation for xent loss]{corollary}{xentmajor}\label{lem:xent-major}
+Under \cref{ass:orthog}, for cross-entropy loss, if $\vy^\top \bm{1} =1$:
+    \begin{flalign*}
+    \qquad\qquad\qquad\qquad\el(\vw + \Delta \vw) \leq \el(\vw) + \nabla_\vw\el(\vw)^\top \Delta \vw +\frac{1}{|\set{S}|}\sum_{(\vx,\vy)\in \set{S}}\half\norm{\Delta \vf(\vx)}_\infty^2 + \mathcal{O}(\Delta \vf^3).&&
+    \end{flalign*}
+\end{restatable}
+
+When the functional perturbation is reasonably ``spread out'', we would expect $\norm{\Delta \vf(\vx)}_\infty^2 \approx \norm{\Delta \vf(\vx)}_2^2/d_L$. In this setting, the functional majorisation of cross-entropy loss agrees with the functional expansion of mean squared error to second order. While the paper derives automatic gradient descent for the square loss, this observation justifies its application to cross-entropy loss, as in the case of the ImageNet experiments.
+
+\subsection{Recovering existing frameworks}
+\label{sec:recover}
+
+We briefly observe that three existing optimisation frameworks may be recovered efficiently from \cref{thm:functmajor}:
+
+\paragraph{Mirror descent} For linear models $\vf(\vx;\mW) \defeq \mW \vx$, the Bregman divergence $\bregman_{\ell(\cdot,\vy)}(\vf(\vx), \Delta \vf(\vx))$ may be written $\bregman_{\ell(\cdot,\vy)}(\mW\vx, \Delta\mW\vx)$. This is a convex function of the weight perturbation $\Delta \mW$. Substituting into \cref{thm:functmajor} and minimising with respect to $\Delta \mW$ is the starting point for mirror descent.
+
+\paragraph{Gauss-Newton method} Substituting the linearised functional perturbation $\Delta \vf(\vx) \approx \nabla_\vw \vf(\vx) \Delta \vw$ into \cref{lem:sq-major} and minimising with respect to $\Delta \vw$ is the starting point for the Gauss-Newton method.
+
+\paragraph{Natural gradient descent} Substituting the linearised functional perturbation $\Delta \vf(\vx) \approx \nabla_\vw \vf(\vx) \Delta \vw$ into \cref{lem:xent-major} and minimising with respect to $\Delta \vw$ is the starting point for natural gradient descent.

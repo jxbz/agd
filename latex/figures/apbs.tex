@@ -1,0 +1,49 @@
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        [thick, block/.style={draw, minimum size=1.1cm}]
+        
+        \node [block,fill=red!30]    (aa)               {$\el$};
+        \node [block,fill=green!30]  (bb) [right =of aa] {$\ell$};
+        
+        \node [block,fill=orange!30]    (a) [right =of bb]               {$\vf$};
+        \node [block,fill=blue!30]      (b) [right =of a] {$\mW_L$};
+        \node [block,fill=blue!30]      (c) [right =of b] {$\mW_2$};
+        \node [block,fill=blue!30]      (d) [right =of c] {$\mW_1$};
+        
+        \node [block,fill=orange!10] (v) [below =of a] {$\Delta \vf$};
+        \node [block,fill=blue!10]   (x) [above =of b] {$\Delta \mW_L$};
+        \node [block,fill=blue!10]   (y) [above =of c] {$\Delta \mW_2$};
+        \node [block,fill=blue!10]   (z) [above =of d] {$\Delta \mW_1$};
+        
+        \node [block,fill=red!10]    (uu) [below =of aa] {$\Delta \el$};
+        \node [block,fill=green!10]  (vv) [below =of bb] {$\Delta \ell$};
+        
+        \node (q) [above =of y, yshift=-0.9cm, align=center] {perturbations applied by optimiser\\[0.5ex]$\overbrace{\hspace{15.5em}}$};
+        \node (p) [below =of vv, yshift=0.9cm, align=center] {$\underbrace{\hspace{15.5em}}$\\[0.5ex]perturbations induced by optimiser};
+        
+        \node [below =of d, yshift=0.9cm, align=center] {layer $1$};
+        \node [below =of c, yshift=0.9cm, align=center] {layer $2$};
+        \node [below =of b, yshift=0.9cm, align=center] {layer $L$};
+        \node [above =of a, yshift=-0.89cm, align=center] {output};
+        \node [above =of bb, yshift=-0.825cm, align=center] {loss};
+        \node [above =of aa, yshift=-0.89cm, align=center] {objective};
+        
+        \draw[-latex]           (bb) edge (aa);
+        \draw[-latex]           (a) edge (bb);
+        \draw[-latex]           (b) edge (a);
+        \draw[-latex, dashed]   (c) edge (b);
+        \draw[-latex]           (d) edge (c);
+        
+        \draw[-latex] (a) edge (v);
+        \draw[-latex] (x) edge (b);
+        \draw[-latex] (y) edge (c);
+        \draw[-latex] (z) edge (d);
+        
+        \draw[-latex] (aa) edge (uu);
+        \draw[-latex] (bb) edge (vv);
+        
+        \end{tikzpicture}
+    \caption{\captiontitle{Perturbation hierarchy of a deep neural network.} When training a neural network, the optimiser applies structured perturbations to the weights, in the form of one perturbation matrix $\Delta \mW_k$ per weight matrix $\mW_k$. Deep relative trust \citep{my-fromage} provides a tool to understand how structured weight perturbations of this form affect the network output $\vf$. Combining deep relative trust with a Bregman divergence \citep{bregman1967relaxation} allows us to analyse the full perturbation hierarchy.}
+    \label{fig:apbs}
+\end{figure}

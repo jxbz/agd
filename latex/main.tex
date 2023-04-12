@@ -1,0 +1,49 @@
+\documentclass[10pt]{article}
+\usepackage[preprint]{tmlr/tmlr}
+
+\input{packages}
+\input{macros}
+\input{format}
+
+\title{Automatic Gradient Descent:\\Deep Learning without Hyperparameters}
+
+\newcommand{\authspace}{\hspace{3.19em}}
+\newcommand{\auth}[2]{\begin{tabular}{@{}l@{}}{#1}\\\normalfont{#2}\end{tabular}}
+\newcommand{\cred}[1]{{\color{red}  #1}}
+
+\author{\sffamily\auth{Jeremy Bernstein$^\star$}{MIT}\authspace\auth{\hspace{-5pt}Chris Mingard$^\star$}{\hspace{-5pt}U.\ Oxford}\authspace\auth{Kevin Huang}{U.\ Washington}\authspace\auth{Navid Azizan}{MIT} \authspace\auth{Yisong Yue}{Caltech}}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\vspace{-5ex}
+\hfill$\star$ denotes equal contribution.\\
+
+\input{section/00-abstract}
+{\sffamily\textbf{Keywords:}} majorise-minimise meta-algorithm, operator perturbation theory, architecture-aware optimisation
+
+\sffamily
+\setstretch{0}
+\tableofcontents
+\setstretch{1}
+\normalfont
+
+\input{figures/showcase}
+
+\input{section/01-intro}
+\input{section/03-sketch}
+\input{section/04-bounds}
+\input{section/07-experiments}
+\input{section/08-discuss}
+\input{section/98-ack}
+
+\bibliography{refs}
+\bibliographystyle{tmlr/tmlr}
+
+\newpage
+\appendix
+\input{section/99-appendix}
+
+\end{document}

@@ -1,0 +1,29 @@
+\begin{table}
+    \centering
+    \begin{tabularx}{\textwidth}{Xlcc}
+        \toprule
+            \textbf{Theory} & \textbf{Reference} & \makecell{\textbf{Handles the Loss}\\\begin{tikzpicture}[thick, block/.style={draw, minimum size=0.6cm}]
+    \node [block,fill=red!30]    (a)               {$\el$};
+    \node [block,fill=green!30]  (b) [right=0.5cm of a] {$\ell$};
+    \node [block,fill=orange!30] (c) [right=0.5cm of b] {$\vf$};
+    \draw[-latex] (b) edge (a);
+    \draw[-latex] (c) edge (b);
+\end{tikzpicture}} & \makecell{\textbf{Non-Linear Network}\\ \begin{tikzpicture}
+        [thick, block/.style={draw, minimum size=0.6cm}]
+        \node [block,fill=orange!30] (c) {$\vf$};
+        \node [block,fill=blue!30]   (d) [right= 0.5cm of c] {$\vw$};
+        \draw[-latex] (d) edge (c);
+        \end{tikzpicture}} \\
+        \midrule
+        mirror descent & $\mathrlap{\text{\citet{nemirovsky_yudin_1983}}}$\hspace{10em} & \cmark  & \xmark \\
+        Gauss-Newton method &\citet{gauss-newton}& \cmark  & \xmark \\
+        natural gradient descent &\citet{amari}& \cmark  & \xmark \\
+        neural tangent kernel &\citet{NTKjacot}& \cmark  & \xmark \\
+        deep relative trust &\citet{my-fromage}& \xmark  & \cmark \\
+        tensor programs & \citet{Yang2021TensorPI}& \xmark  & \cmark \\
+        automatic gradient descent & this paper &\cmark  & \cmark \\
+        \bottomrule
+\end{tabularx}
+    \caption{\captiontitle{Comparing popular frameworks for first-order optimisation theory.} Frameworks differ in whether they can handle the interaction between the model output $\vf$ and the objective $\el$, and the complex non-linear interaction between the weights $\vw$ and the model output $\vf$. Our framework handles both aspects.}
+    \label{tab:theory}
+\end{table}
