@@ -46,7 +46,7 @@ No training hyperparameters are neccessary. Optionally, you can try `--gain 10.0
 
 ## Description of the method
 
-For the $k\text{th}$ weight matrix $W_k$ in $\mathbb{R}^{d_k \times d_{k-1}}$ and the square loss $\mathcal{L}$:
+For the $k\text{th}$ weight matrix $W_k$ in $\mathbb{R}^{d_k \times d_{k-1}}$ and square or cross-entropy loss $\mathcal{L}$:
 - initial weights are drawn from the uniform measure over orthogonal matrices, and then scaled by $\sqrt{d_k / d_{k-1}}$.
 - weights are updated according to:
 ```math
