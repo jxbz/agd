@@ -32,7 +32,7 @@ Command line arguments are:
 --distribute     # train over multiple gpus (for imagenet)
 --gain           # experimental acceleration of training
 ```
-No training hyperparameters are neccessary. Optionally, you can try `--gain 10.0` which we have found can accelerate training.
+No training hyperparameters are neccessary. Optionally, you can try `--gain 10.0` which we have found can accelerate training. Chris is maintaining a [separate repository](https://github.com/C1510/agd_exp) with some more experimental features.
 
 ## Repository structure
     .
@@ -50,7 +50,7 @@ For the $k\text{th}$ weight matrix $W_k$ in $\mathbb{R}^{d_k \times d_{k-1}}$ an
 - initial weights are drawn from the uniform measure over orthogonal matrices, and then scaled by $\sqrt{d_k / d_{k-1}}$.
 - weights are updated according to:
 ```math
-W_k \gets W_k - \frac{\eta}{L} \cdot \sqrt{\tfrac{d_k}{d_{k-1}}} \cdot \frac{ \nabla_{W_k} \mathcal{L}}{\Vert{ \nabla_{W_k}\mathcal{L}(w)}\Vert _F}.
+W_k \gets W_k - \frac{\eta}{L} \cdot \sqrt{\tfrac{d_k}{d_{k-1}}} \cdot \frac{ \nabla_{W_k} \mathcal{L}}{\Vert{ \nabla_{W_k}\mathcal{L}}\Vert _F}.
 ```
 $L$ measures the depth of the network, and the learning rate $\eta$ is set automatically via:
 
