@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name pytorch
-#SBATCH -o supercloud_logs/%j.log
+#SBATCH -o logs/%j.log
 #SBATCH -N 4
 #SBATCH --tasks-per-node=2
 #SBATCH --gres=gpu:volta:2

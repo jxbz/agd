@@ -3,78 +3,20 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-def getNetwork(args, input_dim, output_dim):
-    if args.arch == 'fcn':
-        return FCN(args.depth, args.width, input_dim, output_dim)
-    elif args.dataset == 'imagenet' and args.arch == 'resnet50':
-        return resnet50(num_classes=1000)
-    elif 'cifar' not in args.dataset:
-        raise Exception("That network only works with CIFAR.")
-    elif args.arch == 'vgg':
-        return VGG16(output_dim)
-    elif args.arch == 'resnet18':
-        return PreActResNet18(output_dim)
-    elif args.arch == 'resnet50':
-        return PreActResNet50(output_dim)
+from functools import partial
+from typing import Any, Callable, List, Optional, Type, Union
+
+import torch
+import torch.nn as nn
+from torch import Tensor
+
+### For CIFAR-10
 
 def PreActResNet18(output_dim):  return PreActResNet(PreActBlock,      [2,2,2,2],  output_dim)
 def PreActResNet34(output_dim):  return PreActResNet(PreActBlock,      [3,4,6,3],  output_dim)
 def PreActResNet50(output_dim):  return PreActResNet(PreActBottleneck, [3,4,6,3],  output_dim)
 def PreActResNet101(output_dim): return PreActResNet(PreActBottleneck, [3,4,23,3], output_dim)
 def PreActResNet152(output_dim): return PreActResNet(PreActBottleneck, [3,8,36,3], output_dim)
-
-def VGG11(output_dim): return VGG_CIFAR([64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'], output_dim)
-def VGG13(output_dim): return VGG_CIFAR([64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'], output_dim)
-def VGG16(output_dim): return VGG_CIFAR([64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'], output_dim)
-def VGG19(output_dim): return VGG_CIFAR([64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'], output_dim)
-
-class FCN(nn.Module):
-    def __init__(self, depth, width, input_dim, output_dim, bias=False):
-        super(FCN, self).__init__()
-        
-        self.initial = nn.Linear(input_dim, width, bias=bias)
-        self.layers = nn.ModuleList([nn.Linear(width, width, bias=bias) for _ in range(depth-2)])
-        self.final = nn.Linear(width, output_dim, bias=bias)
-        
-    def forward(self, x):        
-        x = x.view(x.shape[0],-1)
-
-        x = self.initial(x)
-        x = F.relu(x) * math.sqrt(2)
-        
-        for layer in self.layers:
-            x = layer(x)
-            x = F.relu(x) * math.sqrt(2)
-        
-        return self.final(x)
-
-class VGG_CIFAR(nn.Module):
-    def __init__(self, vgg_cfg, output_dim=10, bias=False, affine=False):
-        super(VGG_CIFAR, self).__init__()
-        self.bias = bias
-        self.affine = affine
-        self.features = self._make_layers(vgg_cfg)
-        self.classifier = nn.Linear(512, output_dim, bias=self.bias)
-
-    def forward(self, x):
-        out = self.features(x)
-        out = out.view(out.size(0), -1)
-        out = self.classifier(out)
-        return out
-
-    def _make_layers(self, cfg):
-        layers = []
-        in_channels = 3
-        for x in cfg:
-            if x == 'M':
-                layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
-            else:
-                layers += [nn.Conv2d(in_channels, x, kernel_size=3, padding=1, bias=self.bias),
-                           nn.BatchNorm2d(x, affine=self.affine),
-                           nn.ReLU(inplace=True)]
-                in_channels = x
-        layers += [nn.AvgPool2d(kernel_size=1, stride=1)]
-        return nn.Sequential(*layers)
 
 class PreActBlock(nn.Module):
     '''Pre-activation version of the BasicBlock.'''
@@ -160,13 +102,7 @@ class PreActResNet(nn.Module):
         out = self.linear(out)
         return out
 
-from functools import partial
-from typing import Any, Callable, List, Optional, Type, Union
-
-import torch
-import torch.nn as nn
-from torch import Tensor
-
+### For ImageNet
 
 def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Conv2d:
     """3x3 convolution with padding"""

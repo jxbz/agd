@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -o supercloud_logs/%j.log
+#SBATCH -o logs/%j.log
 #SBATCH --gres=gpu:volta:1
 #SBATCH --cpus-per-task=20
 

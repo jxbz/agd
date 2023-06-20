@@ -4,11 +4,14 @@ import math
 import argparse
 import pickle
 import torch
+import importlib
 
 from tqdm        import tqdm
-from util.data   import getData
-from util.models import getNetwork
 from agd         import AGD
+
+from architecture.fcn    import *
+from architecture.vgg    import *
+from architecture.resnet import *
 
 ############################################################################################
 ######################################### Parse args #######################################
@@ -62,7 +65,9 @@ print("\nNote: depth and width are only used for fully-connected networks.")
 
 print("\nGetting data...")
 print("==================================="*2)
-trainset, testset, input_dim, output_dim = getData(args.dataset)
+
+data_module = importlib.import_module("data."+args.dataset)
+trainset, testset, input_dim, output_dim = data_module.getData()
 
 if args.distribute:
     train_sampler = torch.utils.data.distributed.DistributedSampler(trainset)
@@ -87,7 +92,20 @@ else:
 ##################################### Set architecture #####################################
 ############################################################################################
 
-net = getNetwork(args, input_dim, output_dim).cuda(local_rank)
+if args.arch == 'fcn':
+    net = FCN(args.depth, args.width, input_dim, output_dim)
+elif args.dataset == 'imagenet' and args.arch == 'resnet50':
+    net = resnet50(num_classes=1000)
+elif 'cifar' not in args.dataset:
+    raise Exception("That network only works with CIFAR.")
+elif args.arch == 'vgg':
+    net = VGG16(output_dim)
+elif args.arch == 'resnet18':
+    net = PreActResNet18(output_dim)
+elif args.arch == 'resnet50':
+    net = PreActResNet50(output_dim)
+
+net = net.cuda(local_rank)
 agd = AGD(net, args.gain)
 
 if args.distribute:
