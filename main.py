@@ -6,8 +6,8 @@ import pickle
 import torch
 import importlib
 
-from tqdm        import tqdm
-from agd         import AGD
+from tqdm import tqdm
+from agd  import AGD
 
 from architecture.fcn    import *
 from architecture.vgg    import *

@@ -36,11 +36,10 @@ No training hyperparameters are neccessary. Optionally, you can try `--gain 10.0
 
 ## Repository structure
     .
+    ├── architecture/           # network architectures
+    ├── data/                   # datasets and preprocessing
     ├── latex/                  # source code for the paper
     ├── supercloud/             # mit supercloud run files
-    ├── util/                  
-    │   ├── util/data.py        # datasets and preprocessing
-    │   ├── util/models.py      # architecture definitions
     ├── agd.py                  # automatic gradient descent
     ├── main.py                 # entrypoint to training
 
