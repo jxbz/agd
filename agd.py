@@ -46,6 +46,6 @@ class AGD(Optimizer):
 
         for p in self.net.parameters():
             factor = singular_value(p) / p.grad.norm(dim=(0,1), keepdim=True)
-            p -= self.gain * log / self.depth * factor * p.grad
+            p -= self.gain * log / self.depth * torch.nan_to_num(factor) * p.grad
 
         return log
