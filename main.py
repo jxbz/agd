@@ -27,6 +27,7 @@ parser.add_argument('--epochs',     type=int,   default=200  )
 parser.add_argument('--depth',      type=int,   default=10   )
 parser.add_argument('--width',      type=int,   default=256  )
 parser.add_argument('--distribute', action='store_true'      )
+parser.add_argument('--cpu',        action='store_true'      )
 parser.add_argument('--gain',       type=float, default=1.0  )
 args = parser.parse_args()
 
@@ -105,7 +106,8 @@ elif args.arch == 'resnet18':
 elif args.arch == 'resnet50':
     net = PreActResNet50(output_dim)
 
-net = net.cuda(local_rank)
+if not args.cpu:
+    net = net.cuda(local_rank)
 agd = AGD(net, args.gain)
 
 if args.distribute:
@@ -130,7 +132,8 @@ def loop(net, dataloader, optim, train):
     epoch_log  = 0
 
     for data, target in tqdm(dataloader, total=num_minibatches):
-        data, target = data.cuda(local_rank), target.cuda(local_rank)
+        if not args.cpu:
+            data, target = data.cuda(local_rank), target.cuda(local_rank)
         output = net(data)
 
         if args.loss == 'mse':
