@@ -11,17 +11,22 @@ def singular_value(p):
     return sv
 
 class AGD(Optimizer):
-    @torch.no_grad()
+
     def __init__(self, net, gain=1.0):
 
         self.net = net
         self.depth = len(list(net.parameters()))
         self.gain = gain
 
+        for p in self.net.parameters():
+            if p.dim() == 1: raise Exception("Biases are not supported.")
+
         super().__init__(net.parameters(), defaults=dict())
 
-        for p in net.parameters():
-            if p.dim() == 1: raise Exception("Biases are not supported.")
+    @torch.no_grad()
+    def init(self):
+
+        for p in self.net.parameters():
             if p.dim() == 2: orthogonal_(p)
             if p.dim() == 4:
                 for kx in range(p.shape[2]):

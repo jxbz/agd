@@ -108,7 +108,9 @@ elif args.arch == 'resnet50':
 
 if not args.cpu:
     net = net.cuda(local_rank)
+
 agd = AGD(net, args.gain)
+agd.init()
 
 if args.distribute:
     net = torch.nn.parallel.DistributedDataParallel(net, device_ids=[local_rank])
