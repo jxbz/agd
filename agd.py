@@ -1,7 +1,8 @@
 import math
 import torch
 
-from torch.nn.init import orthogonal_
+from torch.optim.optimizer import Optimizer
+from torch.nn.init         import orthogonal_
 
 def singular_value(p):
     sv = math.sqrt(p.shape[0] / p.shape[1])
@@ -9,13 +10,15 @@ def singular_value(p):
         sv /= math.sqrt(p.shape[2] * p.shape[3])
     return sv
 
-class AGD:
+class AGD(Optimizer):
     @torch.no_grad()
     def __init__(self, net, gain=1.0):
 
         self.net = net
         self.depth = len(list(net.parameters()))
         self.gain = gain
+
+        super().__init__(net.parameters(), defaults=dict())
 
         for p in net.parameters():
             if p.dim() == 1: raise Exception("Biases are not supported.")
