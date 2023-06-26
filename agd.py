@@ -24,7 +24,7 @@ class AGD(Optimizer):
         super().__init__(net.parameters(), defaults=dict())
 
     @torch.no_grad()
-    def init(self):
+    def init_weights(self):
 
         for p in self.net.parameters():
             if p.dim() == 2: orthogonal_(p)

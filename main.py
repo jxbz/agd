@@ -110,7 +110,7 @@ if not args.cpu:
     net = net.cuda(local_rank)
 
 agd = AGD(net, args.gain)
-agd.init()
+agd.init_weights()
 
 if args.distribute:
     net = torch.nn.parallel.DistributedDataParallel(net, device_ids=[local_rank])
